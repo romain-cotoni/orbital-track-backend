@@ -1,0 +1,38 @@
+spring:
+  application:
+    name: Orbital Tracker - Batch
+
+  batch:
+    job:
+      enabled: false  # Jobs are triggered by SatelliteJobScheduler, not on startup
+
+sattrack:
+  batch:
+    leo:
+      orbit-type: "LEO"
+      epoch-window: "24h"
+      exclude-decayed: true
+      chunk-size: 500
+      cron: "0 0 */2 * * *"    # every 2 hours
+      retry-delay-ms: 180000   # 3 minutes between retries
+    meo:
+      orbit-type: "MEO"
+      epoch-window: "30d"
+      exclude-decayed: true
+      chunk-size: 500
+      cron: "0 0 0 * * *"      # daily at midnight
+      retry-delay-ms: 180000
+    heo:
+      orbit-type: "HEO"
+      epoch-window: "72h"
+      exclude-decayed: true
+      chunk-size: 500
+      cron: "0 0 */12 * * *"   # every 12 hours
+      retry-delay-ms: 180000
+    geo:
+      orbit-type: ""
+      epoch-window: "30d"
+      exclude-decayed: true
+      chunk-size: 500
+      cron: "0 0 0 * * SUN"    # weekly on Sunday
+      retry-delay-ms: 180000

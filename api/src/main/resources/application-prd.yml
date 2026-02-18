@@ -1,0 +1,22 @@
+spring:
+  config:
+    activate:
+      on-profile: prd
+
+  #datasource:
+    #url: jdbc:postgresql://localhost:5432/db
+    #username: rom1
+    #password: dev
+
+  #jpa:
+    #hibernate:
+    #  ddl-auto:update
+    #show-sql: false
+    #properties:
+    #  hibernate:
+    #    format_sql:true
+    #database-platform: org.hibernate.dialect.PostgreSQLDialect
+
+
+#logging:
+  #level:

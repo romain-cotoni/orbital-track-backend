@@ -1,0 +1,40 @@
+spring:
+  config:
+    activate:
+      on-profile: dev
+
+  datasource:
+    url: ${DB_URL:jdbc:postgresql://localhost:5432/satellite-tracker-db}
+    username: rom1 #${DB_USERNAME}
+    password: ssap #${DB_PASSWORD}
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+
+  batch:
+    jdbc:
+      initialize-schema: always
+    job:
+      enabled: false
+
+# Space-Track credentials (set via env vars)
+spacetrack:
+  identity: ${SPACETRACK_IDENTITY:}
+  password: ${SPACETRACK_PASSWORD:}
+
+# Batch job configuration
+sattrack:
+  batch:
+    tle:
+      group: ""
+      chunk-size: 500
+      cron: "0 0 2 * * *"
+
+#logging:
+  #level:

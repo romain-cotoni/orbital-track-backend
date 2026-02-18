@@ -1,0 +1,43 @@
+spring:
+  config:
+    activate:
+      on-profile: dev
+
+  datasource:
+    url: ${DB_URL:jdbc:postgresql://localhost:5432/satellite-tracker-db}
+    username: rom1 #${DB_USERNAME}
+    password: ssap #${DB_PASSWORD}
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+
+  batch:
+    jdbc:
+      initialize-schema: always
+
+# Space-Track credentials — set SPACETRACK_IDENTITY and SPACETRACK_PASSWORD env vars
+spacetrack:
+  identity: "romain.cotoni@gmail.com" # ${SPACETRACK_IDENTITY:}
+  password: "cIE1p3TsFqm59hCT"        # ${SPACETRACK_PASSWORD:}
+
+# Override for dev: fast staggered crons (every 5 minutes, offset by 1 min per regime)
+sattrack:
+  batch:
+    leo:
+      cron: "0 0/5 * * * *"   # every 5 min
+      retry-delay-ms: 5000     # 5 seconds between retries (dev)
+    meo:
+      cron: "0 1/5 * * * *"   # every 5 min, offset 1 min
+      retry-delay-ms: 5000
+    heo:
+      cron: "0 2/5 * * * *"   # every 5 min, offset 2 min
+      retry-delay-ms: 5000
+    geo:
+      cron: "0 3/5 * * * *"   # every 5 min, offset 3 min
+      retry-delay-ms: 5000

@@ -1,0 +1,9 @@
+spring:
+  application:
+    name: Orbital Tracker
+
+
+server:
+  servlet:
+    context-path: /api
+
