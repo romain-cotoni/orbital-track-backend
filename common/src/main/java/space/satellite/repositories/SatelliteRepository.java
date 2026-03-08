@@ -10,6 +10,7 @@ import space.satellite.entities.Satellite;
 
 import java.time.Instant;
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Optional;
 
 /**
@@ -29,6 +30,8 @@ public interface SatelliteRepository extends JpaRepository<Satellite, Long>, Jpa
      * @return an Optional containing the satellite if found
      */
     Optional<Satellite> findByNoradCatId(Integer noradCatId);
+
+    List<Satellite> findAllByOrbitRegime(String orbitRegime);
 
     /**
      * Inserts a new satellite or updates an existing one based on NORAD Catalog ID.

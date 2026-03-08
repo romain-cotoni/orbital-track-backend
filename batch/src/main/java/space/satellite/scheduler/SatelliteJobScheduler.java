@@ -2,7 +2,6 @@ package space.satellite.scheduler;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.batch.core.job.Job;
-import org.springframework.batch.core.job.JobExecution;
 import org.springframework.batch.core.job.parameters.JobParameters;
 import org.springframework.batch.core.job.parameters.JobParametersBuilder;
 import org.springframework.batch.core.launch.JobOperator;
@@ -71,12 +70,10 @@ public class SatelliteJobScheduler {
 
     private void runJob(Job job, String orbitType) {
         try {
-            log.info("Starting scheduled {} satellite fetch job...", orbitType);
             JobParameters jobParameters = new JobParametersBuilder()
                     .addString("run.id", Instant.now().toString())
                     .toJobParameters();
-            JobExecution execution = jobOperator.start(job, jobParameters);
-            log.info("{} satellite fetch job started with execution ID: {}", orbitType, execution.getId());
+            jobOperator.start(job, jobParameters);
         } catch (Exception e) {
             log.error("Failed to launch {} satellite fetch job", orbitType, e);
         }

@@ -34,7 +34,8 @@ public class SatelliteJobCompletionListener implements JobExecutionListener {
      */
     @Override
     public void beforeJob(JobExecution jobExecution) {
-        log.info("Satellite fetch job starting: {}", jobExecution.getJobInstance().getJobName());
+        log.info("{} satellite fetch job started with execution ID: {}",
+                jobExecution.getJobInstance().getJobName(), jobExecution.getId());
     }
 
     /**
@@ -73,8 +74,12 @@ public class SatelliteJobCompletionListener implements JobExecutionListener {
             } catch (Exception e) {
                 log.error("Failed to rebuild propagator cache", e);
             }
+            log.info("{} satellite fetch job ended successfully with execution ID: {}",
+                    jobExecution.getJobInstance().getJobName(), jobExecution.getId());
         } else {
             log.warn("Skipping cache rebuild due to job status: {}", jobExecution.getStatus());
+            log.warn("{} satellite fetch job ended with status {} and execution ID: {}",
+                    jobExecution.getJobInstance().getJobName(), jobExecution.getStatus(), jobExecution.getId());
         }
     }
 }
