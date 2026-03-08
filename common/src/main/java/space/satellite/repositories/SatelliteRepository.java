@@ -33,6 +33,15 @@ public interface SatelliteRepository extends JpaRepository<Satellite, Long>, Jpa
 
     List<Satellite> findAllByOrbitRegime(String orbitRegime);
 
+    @Query("SELECT s.objectType, COUNT(s) FROM Satellite s WHERE s.objectType IS NOT NULL GROUP BY s.objectType")
+    List<Object[]> countByObjectType();
+
+    @Query("SELECT s.orbitRegime, COUNT(s) FROM Satellite s WHERE s.orbitRegime IS NOT NULL GROUP BY s.orbitRegime")
+    List<Object[]> countByOrbitRegime();
+
+    @Query("SELECT s.countryCode, COUNT(s) FROM Satellite s WHERE s.countryCode IS NOT NULL GROUP BY s.countryCode")
+    List<Object[]> countByCountryCode();
+
     /**
      * Inserts a new satellite or updates an existing one based on NORAD Catalog ID.
      * <p>

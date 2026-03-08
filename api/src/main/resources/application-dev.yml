@@ -23,6 +23,10 @@ spring:
     job:
       enabled: false
 
+orekit:
+  data:
+    path: /home/rom1/Dropbox/INFORMATIQUE/SPRINGBOOT/Orbital Tracker/common/src/main/resources/orekit-data
+
 # Space-Track credentials (set via env vars)
 spacetrack:
   identity: ${SPACETRACK_IDENTITY:}

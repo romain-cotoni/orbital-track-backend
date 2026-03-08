@@ -14,6 +14,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.orekit.bodies.BodyShape;
 import org.orekit.bodies.GeodeticPoint;
 import org.orekit.bodies.OneAxisEllipsoid;
@@ -50,6 +51,9 @@ import static space.satellite.constants.Constants.TLE_CACHE_DURATION;
 @RequiredArgsConstructor
 public class SatellitePositionService implements PropagatorCacheService {
 
+    @Value("${orekit.data.path:#{null}}")
+    private String orekitDataPath;
+
     private TleService tleService;
 
     private final TleServiceFactory tleServiceFactory;
@@ -77,31 +81,49 @@ public class SatellitePositionService implements PropagatorCacheService {
     @PostConstruct
     public void initialize() {
         DataProvidersManager manager = DataContext.getDefault().getDataProvidersManager();
-        File orekitDataDir = new File(OREKIT_DATA_DIRECTORY);
-        if (orekitDataDir.exists() && orekitDataDir.isDirectory()) {
-            manager.addProvider(new DirectoryCrawler(orekitDataDir));
-            log.info("Orekit data loaded from directory: {}", orekitDataDir.getAbsolutePath());
-        } else {
-            URL resourceUrl = getClass().getClassLoader().getResource(OREKIT_DATA_CLASSPATH);
-            if (resourceUrl != null && "file".equals(resourceUrl.getProtocol())) {
-                try {
-                    File classpathDir = new File(resourceUrl.toURI());
-                    manager.addProvider(new DirectoryCrawler(classpathDir));
-                    log.info("Orekit data loaded from classpath directory: {}", classpathDir.getAbsolutePath());
-                } catch (java.net.URISyntaxException e) {
-                    throw new IllegalStateException("Invalid orekit-data classpath URL: " + resourceUrl, e);
-                }
-            } else {
-                manager.addProvider(new ClasspathCrawler(OREKIT_DATA_CLASSPATH));
-                log.info("Orekit data loaded from classpath: {}", OREKIT_DATA_CLASSPATH);
+
+        // 1. Explicit path from property (highest priority — works for all deployment scenarios)
+        if (orekitDataPath != null && !orekitDataPath.isBlank()) {
+            File configured = new File(orekitDataPath);
+            if (configured.exists() && configured.isDirectory()) {
+                manager.addProvider(new DirectoryCrawler(configured));
+                log.info("Orekit data loaded from configured path: {}", configured.getAbsolutePath());
+                initEarthBodyShape();
+                return;
             }
+            log.warn("orekit.data.path configured but not found: {}", orekitDataPath);
         }
+
+        // 2. Well-known relative path (works when CWD is project root — e.g. batch module)
+        File relativeDir = new File(OREKIT_DATA_DIRECTORY);
+        if (relativeDir.exists() && relativeDir.isDirectory()) {
+            manager.addProvider(new DirectoryCrawler(relativeDir));
+            log.info("Orekit data loaded from relative directory: {}", relativeDir.getAbsolutePath());
+            initEarthBodyShape();
+            return;
+        }
+
+        // 3. Classpath (works in unit tests where target/classes/orekit-data is a real directory)
+        URL resourceUrl = getClass().getClassLoader().getResource(OREKIT_DATA_CLASSPATH);
+        if (resourceUrl != null && "file".equals(resourceUrl.getProtocol())) {
+            try {
+                File classpathDir = new File(resourceUrl.toURI());
+                manager.addProvider(new DirectoryCrawler(classpathDir));
+                log.info("Orekit data loaded from classpath directory: {}", classpathDir.getAbsolutePath());
+            } catch (java.net.URISyntaxException e) {
+                throw new IllegalStateException("Invalid orekit-data classpath URL: " + resourceUrl, e);
+            }
+        } else {
+            manager.addProvider(new ClasspathCrawler(OREKIT_DATA_CLASSPATH));
+            log.info("Orekit data loaded from classpath: {}", OREKIT_DATA_CLASSPATH);
+        }
+
         initEarthBodyShape();
     }
 
     private void initEarthBodyShape() {
         itrf = FramesFactory.getITRF(IERSConventions.IERS_2010, true);
-        earth = new OneAxisEllipsoid(6378137.0,           // equatorial radius (m)
+        earth = new OneAxisEllipsoid(6378137.0,       // equatorial radius (m)
                                      1.0 / 298.257223563, // WGS84 flattening
                                      itrf);
     }
@@ -266,6 +288,33 @@ public class SatellitePositionService implements PropagatorCacheService {
 
         log.info("Cleared {} entries. Cache rebuilt: {} loaded, {} hyperbolic skipped, {} errors",
             previousSize, successCount, skipCount, errorCount);
+    }
+
+
+    // -------------------------------------------------------------------------
+    // Ground track (REST API — Phase 2)
+    // -------------------------------------------------------------------------
+
+    /**
+     * Produces a time-series of geodetic positions along a satellite's ground track.
+     * Samples are spaced {@code interval} apart, starting at {@code start} and covering {@code duration}.
+     *
+     * @param noradId  NORAD Catalog ID
+     * @param start    UTC start time
+     * @param duration total duration to cover
+     * @param interval sampling interval (e.g. 30 s)
+     * @return ordered list of positions; empty if the satellite is unknown or has no valid TLE
+     */
+    public List<SatellitePosition> propagateGroundTrack(int noradId, Instant start,
+                                                        java.time.Duration duration,
+                                                        java.time.Duration interval) {
+        long steps = duration.toSeconds() / interval.toSeconds();
+        List<SatellitePosition> track = new java.util.ArrayList<>((int) steps + 1);
+        for (long i = 0; i <= steps; i++) {
+            Instant t = start.plus(interval.multipliedBy(i));
+            propagate(noradId, t).ifPresent(track::add);
+        }
+        return track;
     }
 
 
