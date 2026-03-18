@@ -55,39 +55,45 @@ public interface SatelliteRepository extends JpaRepository<Satellite, Long>, Jpa
             INSERT INTO satellite (
                 norad_cat_id, name, object_type, country_code,
                 launch_date, decay_date, rcs_size, orbit_regime,
-                epoch, line1, line2, fetched_at, source
+                epoch, line1, line2, fetched_at, source,
+                constellation, mission_type
             ) VALUES (
                 :noradCatId, :name, :objectType, :countryCode,
                 :launchDate, :decayDate, :rcsSize, :orbitRegime,
-                :epoch, :line1, :line2, :fetchedAt, :source
+                :epoch, :line1, :line2, :fetchedAt, :source,
+                :constellation, :missionType
             )
             ON CONFLICT (norad_cat_id) DO UPDATE SET
-                name         = EXCLUDED.name,
-                object_type  = EXCLUDED.object_type,
-                country_code = EXCLUDED.country_code,
-                launch_date  = EXCLUDED.launch_date,
-                decay_date   = EXCLUDED.decay_date,
-                rcs_size     = EXCLUDED.rcs_size,
-                orbit_regime = EXCLUDED.orbit_regime,
-                epoch        = EXCLUDED.epoch,
-                line1        = EXCLUDED.line1,
-                line2        = EXCLUDED.line2,
-                fetched_at   = EXCLUDED.fetched_at,
-                source       = EXCLUDED.source
+                name          = EXCLUDED.name,
+                object_type   = EXCLUDED.object_type,
+                country_code  = EXCLUDED.country_code,
+                launch_date   = EXCLUDED.launch_date,
+                decay_date    = EXCLUDED.decay_date,
+                rcs_size      = EXCLUDED.rcs_size,
+                orbit_regime  = EXCLUDED.orbit_regime,
+                epoch         = EXCLUDED.epoch,
+                line1         = EXCLUDED.line1,
+                line2         = EXCLUDED.line2,
+                fetched_at    = EXCLUDED.fetched_at,
+                source        = EXCLUDED.source,
+                constellation = EXCLUDED.constellation,
+                mission_type  = EXCLUDED.mission_type
             """, nativeQuery = true)
     void upsert(
-            @Param("noradCatId")   Integer   noradCatId,
-            @Param("name")         String    name,
-            @Param("objectType")   String    objectType,
-            @Param("countryCode")  String    countryCode,
-            @Param("launchDate")   LocalDate launchDate,
-            @Param("decayDate")    LocalDate decayDate,
-            @Param("rcsSize")      String    rcsSize,
-            @Param("orbitRegime")  String    orbitRegime,
-            @Param("epoch")        Instant   epoch,
-            @Param("line1")        String    line1,
-            @Param("line2")        String    line2,
-            @Param("fetchedAt")    Instant   fetchedAt,
-            @Param("source")       String    source
+            @Param("noradCatId")    Integer   noradCatId,
+            @Param("name")          String    name,
+            @Param("objectType")    String    objectType,
+            @Param("countryCode")   String    countryCode,
+            @Param("launchDate")    LocalDate launchDate,
+            @Param("decayDate")     LocalDate decayDate,
+            @Param("rcsSize")       String    rcsSize,
+            @Param("orbitRegime")   String    orbitRegime,
+            @Param("epoch")         Instant   epoch,
+            @Param("line1")         String    line1,
+            @Param("line2")         String    line2,
+            @Param("fetchedAt")     Instant   fetchedAt,
+            @Param("source")        String    source,
+            @Param("constellation") String    constellation,
+            @Param("missionType")   String    missionType
     );
 }

@@ -40,5 +40,6 @@ sattrack:
       chunk-size: 500
       cron: "0 0 2 * * *"
 
-#logging:
-  #level:
+logging:
+  level:
+    space.satellite.websocket: DEBUG

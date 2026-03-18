@@ -39,9 +39,11 @@ public class SatelliteController {
         @RequestParam(required = false) String objectType,
         @RequestParam(required = false) String countryCode,
         @RequestParam(required = false) String orbitRegime,
+        @RequestParam(required = false) String constellation,
+        @RequestParam(required = false) String missionType,
         @PageableDefault(size = 50) Pageable pageable
     ) {
-        return ResponseEntity.ok(satelliteQueryService.search(name, objectType, countryCode, orbitRegime, pageable));
+        return ResponseEntity.ok(satelliteQueryService.search(name, objectType, countryCode, orbitRegime, constellation, missionType, pageable));
     }
 
     /**

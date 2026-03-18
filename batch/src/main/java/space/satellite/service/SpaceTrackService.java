@@ -124,6 +124,7 @@ public class SpaceTrackService {
      *   <li>HEO: eccentricity &gt; 0.25</li>
      *   <li>LEO: mean motion &gt; 11.25 rev/day (and eccentricity &le; 0.25)</li>
      *   <li>MEO: period between 600 and 800 minutes</li>
+     *   <li>GEO: everything else (geostationary period ~1436 min)</li>
      * </ul>
      * </p>
      */
@@ -137,7 +138,7 @@ public class SpaceTrackService {
         if (gp.period() != null && gp.period() >= 600 && gp.period() <= 800) {
             return "MEO";
         }
-        return null;
+        return "GEO";
     }
 
     /** Parses Space-Track's microsecond UTC epoch string to {@link Instant}. */

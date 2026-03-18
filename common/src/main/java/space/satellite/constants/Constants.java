@@ -18,6 +18,9 @@ public final class Constants {
 
     public static final Duration TLE_CACHE_DURATION = Duration.ofHours(2);
 
+    /** TLEs older than this are too stale for reliable SGP4/SDP4 propagation. */
+    public static final Duration MAX_TLE_AGE = Duration.ofDays(60);
+
 
     public static final String SPACETRACK_SOURCE = "spacetrack";
     public static final String SPACETRACK_BASE_URL_PRD = "https://www.space-track.org";

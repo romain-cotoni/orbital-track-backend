@@ -20,8 +20,7 @@ public class TleSpaceTrackService implements TleService {
     private final RestClient restClient;
     private final SpaceTrackAuthService spaceTrackAuthService;
 
-    public TleSpaceTrackService(@Qualifier("spaceTrackRestClient") RestClient restClient,
-                                SpaceTrackAuthService spaceTrackAuthService) {
+    public TleSpaceTrackService(@Qualifier("spaceTrackRestClient") RestClient restClient, SpaceTrackAuthService spaceTrackAuthService) {
         this.restClient = restClient;
         this.spaceTrackAuthService = spaceTrackAuthService;
     }
@@ -44,13 +43,13 @@ public class TleSpaceTrackService implements TleService {
     }
 
     private String getTle(int catalogNumber, String cookie) {
-        var request = restClient.get()
-                .uri(String.format(SPACETRACK_BASE_URL + SPACETRACK_BASE_QUERY_URL, catalogNumber));
+        var request = restClient.get().uri(String.format(SPACETRACK_BASE_URL + SPACETRACK_BASE_QUERY_URL, catalogNumber));
+
         if (StringUtils.hasText(cookie)) {
             request = request.header(HttpHeaders.COOKIE, cookie);
         }
-        String tleBody = request.retrieve()
-                .body(String.class);
+
+        String tleBody = request.retrieve().body(String.class);
 
         if (!StringUtils.hasText(tleBody)) {
             throw new TleException("SpaceTrack TLE empty response");

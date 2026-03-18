@@ -17,7 +17,9 @@ public record SatelliteMetaDto(
     LocalDate decayDate,
     String  rcsSize,
     String  orbitRegime,
-    String  source
+    String  source,
+    String  constellation,
+    String  missionType
 ) {
     public static SatelliteMetaDto from(Satellite s) {
         return new SatelliteMetaDto(
@@ -29,7 +31,9 @@ public record SatelliteMetaDto(
             s.getDecayDate(),
             s.getRcsSize(),
             s.getOrbitRegime(),
-            s.getSource()
+            s.getSource(),
+            s.getConstellation(),
+            s.getMissionType()
         );
     }
 }

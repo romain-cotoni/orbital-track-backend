@@ -35,12 +35,15 @@ public class SatelliteQueryService {
 
     public Page<SatelliteMetaDto> search(String name, String objectType,
                                          String countryCode, String orbitRegime,
+                                         String constellation, String missionType,
                                          Pageable pageable) {
         Specification<Satellite> spec = Specification
             .where(SatelliteSpecification.hasName(name))
             .and(SatelliteSpecification.hasObjectType(objectType))
             .and(SatelliteSpecification.hasCountryCode(countryCode))
-            .and(SatelliteSpecification.hasOrbitRegime(orbitRegime));
+            .and(SatelliteSpecification.hasOrbitRegime(orbitRegime))
+            .and(SatelliteSpecification.hasConstellation(constellation))
+            .and(SatelliteSpecification.hasMissionType(missionType));
 
         return satelliteRepository.findAll(spec, pageable).map(SatelliteMetaDto::from);
     }

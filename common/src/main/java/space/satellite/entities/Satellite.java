@@ -79,4 +79,10 @@ public class Satellite {
 
     /** Data source: "spacetrack" or "celestrak". */
     private String source;
+
+    /** Constellation the satellite belongs to (e.g. "Starlink", "Galileo", "GLONASS"). Null if none/unknown. */
+    private String constellation;
+
+    /** Mission type derived from name (e.g. "INTERNET", "NAVIGATION", "WEATHER", "EARTH_OBS", "COMMUNICATION", "SCIENCE"). Null if unknown. */
+    private String missionType;
 }

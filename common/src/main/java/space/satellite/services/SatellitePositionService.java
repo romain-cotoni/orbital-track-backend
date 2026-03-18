@@ -40,6 +40,7 @@ import space.satellite.dtos.SatelliteResponseDto;
 import space.satellite.entities.Satellite;
 import space.satellite.repositories.SatelliteRepository;
 
+import static space.satellite.constants.Constants.MAX_TLE_AGE;
 import static space.satellite.constants.Constants.OREKIT_DATA_CLASSPATH;
 import static space.satellite.constants.Constants.OREKIT_DATA_DIRECTORY;
 import static space.satellite.constants.Constants.SPACETRACK_SOURCE;
@@ -174,7 +175,18 @@ public class SatellitePositionService implements PropagatorCacheService {
                 return Optional.empty();
             }
 
-            satelliteCache.put(key, new CachedSatelliteData(tle, TLEPropagator.selectExtrapolator(tle), Instant.now()));
+            Instant tleEpoch = tle.getDate().toDate(TimeScalesFactory.getUTC()).toInstant();
+            if (java.time.Duration.between(tleEpoch, Instant.now()).compareTo(MAX_TLE_AGE) > 0) {
+                log.debug("Skipping stale TLE for NORAD {} (epoch: {})", noradId, tleEpoch);
+                return Optional.empty();
+            }
+
+            try {
+                satelliteCache.put(key, new CachedSatelliteData(tle, TLEPropagator.selectExtrapolator(tle), Instant.now()));
+            } catch (Exception e) {
+                log.warn("Propagation failed for NORAD {} at {}: {}", noradId, time, e.getMessage());
+                return Optional.empty();
+            }
             orbitRegime = sat.getOrbitRegime();
             if (orbitRegime != null) {
                 noradToRegime.put(noradId, orbitRegime);
@@ -182,8 +194,8 @@ public class SatellitePositionService implements PropagatorCacheService {
         }
 
         // Always create a fresh propagator — TLEPropagator is NOT thread-safe
-        TLEPropagator propagator = TLEPropagator.selectExtrapolator(tle);
         try {
+            TLEPropagator propagator = TLEPropagator.selectExtrapolator(tle);
             AbsoluteDate propagationTime = new AbsoluteDate(time, TimeScalesFactory.getUTC());
             Frame eme2000          = FramesFactory.getEME2000();
             PVCoordinates pvEme2000 = propagator.getPVCoordinates(propagationTime, eme2000);
@@ -191,15 +203,23 @@ public class SatellitePositionService implements PropagatorCacheService {
             PVCoordinates pvItrf   = transform.transformPVCoordinates(pvEme2000);
             GeodeticPoint geoPoint = earth.transform(pvItrf.getPosition(), itrf, propagationTime);
 
+            double lat = Math.toDegrees(geoPoint.getLatitude());
+            double lon = Math.toDegrees(geoPoint.getLongitude());
+            double alt = geoPoint.getAltitude();
+            double vx  = pvItrf.getVelocity().getX();
+            double vy  = pvItrf.getVelocity().getY();
+            double vz  = pvItrf.getVelocity().getZ();
+
+            if (!Double.isFinite(lat) || !Double.isFinite(lon) || !Double.isFinite(alt)
+                    || !Double.isFinite(vx) || !Double.isFinite(vy) || !Double.isFinite(vz)) {
+                log.warn("Non-finite position for NORAD {} at {}: lat={}, lon={}, alt={}", noradId, time, lat, lon, alt);
+                return Optional.empty();
+            }
+
             return Optional.of(new SatellitePosition(
                 noradId,
                 orbitRegime,
-                Math.toDegrees(geoPoint.getLatitude()),
-                Math.toDegrees(geoPoint.getLongitude()),
-                geoPoint.getAltitude(),
-                pvItrf.getVelocity().getX(),
-                pvItrf.getVelocity().getY(),
-                pvItrf.getVelocity().getZ(),
+                lat, lon, alt, vx, vy, vz,
                 time
             ));
         } catch (Exception e) {
@@ -226,15 +246,15 @@ public class SatellitePositionService implements PropagatorCacheService {
         if (noradIds == null || noradIds.isEmpty()) {
             log.info("Regime index empty for {}. Falling back to DB query.", orbitRegime);
             noradIds = satelliteRepository.findAllByOrbitRegime(orbitRegime).stream()
-                .map(Satellite::getNoradCatId)
-                .collect(Collectors.toSet());
+                                          .map(Satellite::getNoradCatId)
+                                          .collect(Collectors.toSet());
         }
 
         return noradIds.parallelStream()
-            .map(id -> propagate(id, time))
-            .filter(Optional::isPresent)
-            .map(Optional::get)
-            .toList();
+                       .map(id -> propagate(id, time))
+                       .filter(Optional::isPresent)
+                       .map(Optional::get)
+                       .toList();
     }
 
 
@@ -266,6 +286,13 @@ public class SatellitePositionService implements PropagatorCacheService {
                     continue;
                 }
 
+                Instant tleEpoch = orekitTle.getDate().toDate(TimeScalesFactory.getUTC()).toInstant();
+                if (java.time.Duration.between(tleEpoch, Instant.now()).compareTo(MAX_TLE_AGE) > 0) {
+                    log.debug("Skipping stale TLE for NORAD {} (epoch: {})", sat.getNoradCatId(), tleEpoch);
+                    skipCount++;
+                    continue;
+                }
+
                 SatelliteKey key = SatelliteKey.norad(sat.getNoradCatId());
                 Instant fetchTime = sat.getFetchedAt() != null ? sat.getFetchedAt() : Instant.now();
                 satelliteCache.put(key, new CachedSatelliteData(orekitTle, TLEPropagator.selectExtrapolator(orekitTle), fetchTime));
@@ -286,8 +313,7 @@ public class SatellitePositionService implements PropagatorCacheService {
         regimeIndex = new ConcurrentHashMap<>(newRegimeIndex);
         noradToRegime = new ConcurrentHashMap<>(newNoradToRegime);
 
-        log.info("Cleared {} entries. Cache rebuilt: {} loaded, {} hyperbolic skipped, {} errors",
-            previousSize, successCount, skipCount, errorCount);
+        log.info("Cleared {} entries. Cache rebuilt: {} loaded, {} hyperbolic skipped, {} errors", previousSize, successCount, skipCount, errorCount);
     }
 
 

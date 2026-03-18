@@ -41,7 +41,9 @@ public class SatelliteItemWriter implements ItemWriter<Satellite> {
                     s.getLine1(),
                     s.getLine2(),
                     s.getFetchedAt(),
-                    s.getSource()
+                    s.getSource(),
+                    s.getConstellation(),
+                    s.getMissionType()
             );
         }
 

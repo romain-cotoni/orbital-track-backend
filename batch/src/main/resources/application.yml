@@ -2,6 +2,9 @@ spring:
   application:
     name: Orbital Tracker - Batch
 
+  main:
+    web-application-type: none   # Batch has no HTTP server — avoids port conflict with API
+
   batch:
     job:
       enabled: false  # Jobs are triggered by SatelliteJobScheduler, not on startup
@@ -31,7 +34,7 @@ sattrack:
       retry-delay-ms: 180000
     geo:
       orbit-type: ""
-      epoch-window: "30d"
+      epoch-window: ""
       exclude-decayed: true
       chunk-size: 500
       cron: "0 0 0 * * SUN"    # weekly on Sunday
