@@ -1,63 +1,57 @@
 spring:
   config:
     activate:
-      on-profile: dev
+      on-profile: prd
 
   datasource:
-    url: ${DB_URL:jdbc:postgresql://localhost:5432/satellite-tracker-db}
+    url: ${DB_URL:jdbc:postgresql://postgres:5432/satellite-tracker-db}
     username: ${DB_USERNAME}
     password: ${DB_PASSWORD}
 
   jpa:
     hibernate:
       ddl-auto: update
-    show-sql: false #true
+    show-sql: false
     properties:
       hibernate:
-        format_sql: false #true
+        format_sql: false
     database-platform: org.hibernate.dialect.PostgreSQLDialect
 
   batch:
     jdbc:
       initialize-schema: always
 
-# Space-Track credentials — set SPACETRACK_IDENTITY and SPACETRACK_PASSWORD env vars
 spacetrack:
   identity: ${SPACETRACK_IDENTITY}
   password: ${SPACETRACK_PASSWORD}
 
-# Override for dev: fast staggered crons (every 5 minutes, offset by 1 min per regime)
 sattrack:
   batch:
     leo:
-      group: ""                # fetch all object types (payload, debris, rocket body)
       orbit-type: "LEO"
       epoch-window: "24h"
       exclude-decayed: true
       chunk-size: 500
-      cron: "0 0/5 * * * *"   # every 5 min
-      retry-delay-ms: 5000     # 5 seconds between retries (dev)
+      cron: "0 0 */2 * * *"    # every 2 hours
+      retry-delay-ms: 180000   # 3 minutes between retries
     meo:
-      group: ""
       orbit-type: "MEO"
       epoch-window: "30d"
       exclude-decayed: true
       chunk-size: 500
-      cron: "0 1/5 * * * *"   # every 5 min, offset 1 min
-      retry-delay-ms: 5000
+      cron: "0 0 0 * * *"      # daily at midnight
+      retry-delay-ms: 180000
     heo:
-      group: ""
       orbit-type: "HEO"
       epoch-window: "72h"
       exclude-decayed: true
       chunk-size: 500
-      cron: "0 2/5 * * * *"   # every 5 min, offset 2 min
-      retry-delay-ms: 5000
+      cron: "0 0 */12 * * *"   # every 12 hours
+      retry-delay-ms: 180000
     geo:
-      group: ""
       orbit-type: ""
       epoch-window: ""
       exclude-decayed: true
       chunk-size: 500
-      cron: "0 3/5 * * * *"   # every 5 min, offset 3 min
-      retry-delay-ms: 5000
+      cron: "0 0 0 * * SUN"    # weekly on Sunday
+      retry-delay-ms: 180000

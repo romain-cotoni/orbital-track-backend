@@ -5,16 +5,16 @@ spring:
 
   datasource:
     url: ${DB_URL:jdbc:postgresql://localhost:5432/satellite-tracker-db}
-    username: rom1 #${DB_USERNAME}
-    password: ssap #${DB_PASSWORD}
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
 
   jpa:
     hibernate:
       ddl-auto: update
-    show-sql: true
+    show-sql: false #true
     properties:
       hibernate:
-        format_sql: true
+        format_sql: false #true
     database-platform: org.hibernate.dialect.PostgreSQLDialect
 
   batch:
@@ -25,7 +25,7 @@ spring:
 
 orekit:
   data:
-    path: /home/rom1/Dropbox/INFORMATIQUE/SPRINGBOOT/Orbital Tracker/common/src/main/resources/orekit-data
+    path: ${OREKIT_DATA_PATH:/home/rom1/Dropbox/INFORMATIQUE/SPRINGBOOT/Orbital Tracker/common/src/main/resources/orekit-data}
 
 # Space-Track credentials (set via env vars)
 spacetrack:
@@ -33,12 +33,12 @@ spacetrack:
   password: ${SPACETRACK_PASSWORD:}
 
 # Batch job configuration
-sattrack:
-  batch:
-    tle:
-      group: ""
-      chunk-size: 500
-      cron: "0 0 2 * * *"
+#sattrack:
+#  batch:
+#    tle:
+#      group: ""
+#      chunk-size: 500
+#      cron: "0 0 2 * * *"
 
 logging:
   level:
