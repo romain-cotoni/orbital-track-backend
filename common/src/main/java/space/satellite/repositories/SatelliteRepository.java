@@ -42,6 +42,10 @@ public interface SatelliteRepository extends JpaRepository<Satellite, Long>, Jpa
     @Query("SELECT s.countryCode, COUNT(s) FROM Satellite s WHERE s.countryCode IS NOT NULL GROUP BY s.countryCode")
     List<Object[]> countByCountryCode();
 
+    @Modifying
+    @Query("DELETE FROM Satellite s WHERE s.orbitRegime = :orbitRegime AND s.fetchedAt < :cutoff")
+    int deleteStaleByOrbitRegime(@Param("orbitRegime") String orbitRegime, @Param("cutoff") Instant cutoff);
+
     /**
      * Inserts a new satellite or updates an existing one based on NORAD Catalog ID.
      * <p>

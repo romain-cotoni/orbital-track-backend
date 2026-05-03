@@ -35,6 +35,8 @@ public class SatelliteJobProperties {
 
     private boolean excludeDecayed = true;
 
+    /** Satellites not refreshed within this many days are deleted after each job run. */
+    private int cleanupThresholdDays = 60;
 
     /** Number of Satellite records to process per transaction chunk. */
     private int chunkSize = 500;

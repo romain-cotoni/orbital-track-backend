@@ -21,6 +21,9 @@ public final class Constants {
     /** TLEs older than this are too stale for reliable SGP4/SDP4 propagation. */
     public static final Duration MAX_TLE_AGE = Duration.ofDays(60);
 
+    /** GEO satellites update less frequently — allow a longer TLE age window. */
+    public static final Duration MAX_TLE_AGE_GEO = Duration.ofDays(180);
+
 
     public static final String SPACETRACK_SOURCE = "spacetrack";
     public static final String SPACETRACK_BASE_URL_PRD = "https://www.space-track.org";
@@ -57,6 +60,8 @@ public final class Constants {
     public static final String WITHIN_72_HOURS_URL = "/epoch/%3Enow-3";
 
     public static final String WITHIN_30_DAYS_URL  = "/epoch/%3Enow-30";
+
+    public static final String WITHIN_180_DAYS_URL = "/epoch/%3Enow-180";
 
     public static final String NOT_DECAYED_URL     = "/decay_date/null-val";
 

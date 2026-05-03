@@ -5,10 +5,14 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.batch.core.BatchStatus;
 import org.springframework.batch.core.job.JobExecution;
 import org.springframework.batch.core.listener.JobExecutionListener;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import space.satellite.config.SatelliteJobProperties;
+import space.satellite.service.SatelliteCleanupService;
 import space.satellite.services.PropagatorCacheService;
 
 import java.time.Duration;
+import java.util.Map;
 
 /**
  * Spring Batch job listener for the Satellite fetch job.
@@ -26,6 +30,11 @@ import java.time.Duration;
 public class SatelliteJobCompletionListener implements JobExecutionListener {
 
     private final PropagatorCacheService propagatorCacheService;
+    private final SatelliteCleanupService satelliteCleanupService;
+
+    /** All SatelliteJobProperties beans, keyed by bean name (e.g. "leoJobProperties"). */
+    @Autowired
+    private Map<String, SatelliteJobProperties> allJobProperties;
 
     /**
      * Called before job execution starts.
@@ -74,6 +83,20 @@ public class SatelliteJobCompletionListener implements JobExecutionListener {
             } catch (Exception e) {
                 log.error("Failed to rebuild propagator cache", e);
             }
+
+            try {
+                String jobName = jobExecution.getJobInstance().getJobName();
+                // e.g. "leoSatelliteFetchJob" → regime "LEO", props key "leoJobProperties"
+                String prefix = jobName.replace("SatelliteFetchJob", "");
+                String orbitRegime = prefix.isBlank() ? "GEO" : prefix.toUpperCase();
+                SatelliteJobProperties props = allJobProperties.get(prefix + "JobProperties");
+                if (props != null) {
+                    satelliteCleanupService.cleanupStale(orbitRegime, props.getCleanupThresholdDays());
+                }
+            } catch (Exception e) {
+                log.error("Failed to clean up stale satellites", e);
+            }
+
             log.info("{} satellite fetch job ended successfully with execution ID: {}",
                     jobExecution.getJobInstance().getJobName(), jobExecution.getId());
         } else {

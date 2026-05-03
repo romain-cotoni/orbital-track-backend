@@ -7,7 +7,6 @@ import org.springframework.batch.core.repository.JobRepository;
 import org.springframework.batch.core.step.Step;
 import org.springframework.batch.core.step.builder.StepBuilder;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.transaction.PlatformTransactionManager;
@@ -36,34 +35,6 @@ public class BatchConfig {
     private final SatelliteJobCompletionListener satelliteJobCompletionListener;
     private final SpaceTrackService spaceTrackService;
     //private final CelestrakService celestrakService;
-
-    // -------------------------------------------------------------------------
-    // Properties beans — one per orbit regime
-    // -------------------------------------------------------------------------
-
-    @Bean
-    @ConfigurationProperties(prefix = "sattrack.batch.leo")
-    public SatelliteJobProperties leoJobProperties() {
-        return new SatelliteJobProperties();
-    }
-
-    @Bean
-    @ConfigurationProperties(prefix = "sattrack.batch.meo")
-    public SatelliteJobProperties meoJobProperties() {
-        return new SatelliteJobProperties();
-    }
-
-    @Bean
-    @ConfigurationProperties(prefix = "sattrack.batch.heo")
-    public SatelliteJobProperties heoJobProperties() {
-        return new SatelliteJobProperties();
-    }
-
-    @Bean
-    @ConfigurationProperties(prefix = "sattrack.batch.geo")
-    public SatelliteJobProperties geoJobProperties() {
-        return new SatelliteJobProperties();
-    }
 
     // -------------------------------------------------------------------------
     // Reader beans — one per orbit regime (stateful, must not be shared)

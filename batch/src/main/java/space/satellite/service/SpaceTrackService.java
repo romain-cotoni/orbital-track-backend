@@ -28,6 +28,7 @@ import static space.satellite.constants.Constants.SPACETRACK_BASE_URL;
 import static space.satellite.constants.Constants.SPACETRACK_SOURCE;
 import static space.satellite.constants.Constants.WITHIN_24_HOURS_URL;
 import static space.satellite.constants.Constants.WITHIN_30_DAYS_URL;
+import static space.satellite.constants.Constants.WITHIN_180_DAYS_URL;
 import static space.satellite.constants.Constants.WITHIN_72_HOURS_URL;
 
 /**
@@ -177,10 +178,11 @@ public class SpaceTrackService {
 
         if (StringUtils.hasText(props.getEpochWindow())) {
             String epochSegment = switch (props.getEpochWindow()) {
-                case "24h" -> WITHIN_24_HOURS_URL;
-                case "72h" -> WITHIN_72_HOURS_URL;
-                case "30d" -> WITHIN_30_DAYS_URL;
-                default -> "";
+                case "24h"  -> WITHIN_24_HOURS_URL;
+                case "72h"  -> WITHIN_72_HOURS_URL;
+                case "30d"  -> WITHIN_30_DAYS_URL;
+                case "180d" -> WITHIN_180_DAYS_URL;
+                default     -> "";
             };
             url.append(epochSegment);
         }

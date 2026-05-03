@@ -244,7 +244,7 @@ public class SatellitePositionService implements PropagatorCacheService {
         Set<Integer> noradIds = regimeIndex.get(orbitRegime);
 
         if (noradIds == null || noradIds.isEmpty()) {
-            log.info("Regime index empty for {}. Falling back to DB query.", orbitRegime);
+            log.debug("Regime index empty for {}. Falling back to DB query.", orbitRegime);
             noradIds = satelliteRepository.findAllByOrbitRegime(orbitRegime).stream()
                                           .map(Satellite::getNoradCatId)
                                           .collect(Collectors.toSet());

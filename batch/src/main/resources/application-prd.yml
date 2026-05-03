@@ -31,6 +31,7 @@ sattrack:
       orbit-type: "LEO"
       epoch-window: "24h"
       exclude-decayed: true
+      cleanup-threshold-days: 7
       chunk-size: 500
       cron: "0 0 */2 * * *"    # every 2 hours
       retry-delay-ms: 180000   # 3 minutes between retries
@@ -38,6 +39,7 @@ sattrack:
       orbit-type: "MEO"
       epoch-window: "30d"
       exclude-decayed: true
+      cleanup-threshold-days: 35
       chunk-size: 500
       cron: "0 0 0 * * *"      # daily at midnight
       retry-delay-ms: 180000
@@ -45,13 +47,15 @@ sattrack:
       orbit-type: "HEO"
       epoch-window: "72h"
       exclude-decayed: true
+      cleanup-threshold-days: 14
       chunk-size: 500
       cron: "0 0 */12 * * *"   # every 12 hours
       retry-delay-ms: 180000
     geo:
       orbit-type: ""
-      epoch-window: ""
+      epoch-window: "180d"
       exclude-decayed: true
+      cleanup-threshold-days: 60
       chunk-size: 500
       cron: "0 0 0 * * SUN"    # weekly on Sunday
       retry-delay-ms: 180000

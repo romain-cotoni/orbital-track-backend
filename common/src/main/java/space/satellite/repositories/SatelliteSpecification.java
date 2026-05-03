@@ -13,6 +13,13 @@ public interface SatelliteSpecification {
         };
     }
 
+    static Specification<Satellite> hasNoradCatId(final Integer noradCatId) {
+        return (root, query, cb) -> {
+            if (noradCatId == null) return null;
+            return cb.equal(root.get("noradCatId"), noradCatId);
+        };
+    }
+
     static Specification<Satellite> hasObjectType(final String objectType) {
         return (root, query, cb) -> {
             if (!StringUtils.hasText(objectType)) return null;

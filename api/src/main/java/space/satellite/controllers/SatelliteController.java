@@ -35,6 +35,7 @@ public class SatelliteController {
      */
     @GetMapping("/satellites")
     public ResponseEntity<Page<SatelliteMetaDto>> list(
+        @RequestParam(required = false) Integer noradCatId,
         @RequestParam(required = false) String name,
         @RequestParam(required = false) String objectType,
         @RequestParam(required = false) String countryCode,
@@ -43,7 +44,7 @@ public class SatelliteController {
         @RequestParam(required = false) String missionType,
         @PageableDefault(size = 50) Pageable pageable
     ) {
-        return ResponseEntity.ok(satelliteQueryService.search(name, objectType, countryCode, orbitRegime, constellation, missionType, pageable));
+        return ResponseEntity.ok(satelliteQueryService.search(noradCatId, name, objectType, countryCode, orbitRegime, constellation, missionType, pageable));
     }
 
     /**

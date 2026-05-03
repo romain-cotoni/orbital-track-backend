@@ -33,12 +33,13 @@ public class SatelliteQueryService {
     // GET /api/satellites — paginated + filterable list
     // -------------------------------------------------------------------------
 
-    public Page<SatelliteMetaDto> search(String name, String objectType,
+    public Page<SatelliteMetaDto> search(Integer noradCatId, String name, String objectType,
                                          String countryCode, String orbitRegime,
                                          String constellation, String missionType,
                                          Pageable pageable) {
         Specification<Satellite> spec = Specification
-            .where(SatelliteSpecification.hasName(name))
+            .where(SatelliteSpecification.hasNoradCatId(noradCatId))
+            .and(SatelliteSpecification.hasName(name))
             .and(SatelliteSpecification.hasObjectType(objectType))
             .and(SatelliteSpecification.hasCountryCode(countryCode))
             .and(SatelliteSpecification.hasOrbitRegime(orbitRegime))

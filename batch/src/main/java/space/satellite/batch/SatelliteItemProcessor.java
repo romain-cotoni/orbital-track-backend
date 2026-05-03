@@ -3,9 +3,11 @@ package space.satellite.batch;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.batch.infrastructure.item.ItemProcessor;
 import org.springframework.stereotype.Component;
+import space.satellite.constants.Constants;
 import space.satellite.entities.Satellite;
 import space.satellite.record.SatelliteRecord;
 
+import java.time.Duration;
 import java.time.Instant;
 
 /**
@@ -28,6 +30,11 @@ public class SatelliteItemProcessor implements ItemProcessor<SatelliteRecord, Sa
     public Satellite process(SatelliteRecord record) {
         if (!isValidTle(record)) {
             log.warn("Invalid TLE for NORAD ID {}: skipping", record.noradCatId());
+            return null;
+        }
+
+        if (isTleStale(record)) {
+            log.warn("Stale TLE for NORAD ID {} ({}): skipping", record.noradCatId(), record.name());
             return null;
         }
 
@@ -148,6 +155,12 @@ public class SatelliteItemProcessor implements ItemProcessor<SatelliteRecord, Sa
     }
 
     // -------------------------------------------------------------------------
+
+    private boolean isTleStale(SatelliteRecord record) {
+        if (record.epoch() == null) return true;
+        Duration maxAge = "GEO".equals(record.orbitRegime()) ? Constants.MAX_TLE_AGE_GEO : Constants.MAX_TLE_AGE;
+        return Duration.between(record.epoch(), Instant.now()).compareTo(maxAge) > 0;
+    }
 
     private boolean isValidTle(SatelliteRecord record) {
         if (record == null) return false;
