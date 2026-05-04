@@ -19,12 +19,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static space.satellite.constants.Constants.FORMAT_JSON;
+import static space.satellite.constants.Constants.GEO_URL;
 import static space.satellite.constants.Constants.HEO_URL;
 import static space.satellite.constants.Constants.LEO_URL;
 import static space.satellite.constants.Constants.MEO_URL;
 import static space.satellite.constants.Constants.NOT_DECAYED_URL;
 import static space.satellite.constants.Constants.SPACETRACK_BASE_QUERY_URL;
-import static space.satellite.constants.Constants.SPACETRACK_BASE_URL;
 import static space.satellite.constants.Constants.SPACETRACK_SOURCE;
 import static space.satellite.constants.Constants.WITHIN_24_HOURS_URL;
 import static space.satellite.constants.Constants.WITHIN_30_DAYS_URL;
@@ -44,10 +44,10 @@ import static space.satellite.constants.Constants.WITHIN_72_HOURS_URL;
 public class SpaceTrackService {
 
     /** Space-Track epoch format: microsecond UTC datetime without timezone suffix. */
-    private static final DateTimeFormatter EPOCH_FORMAT =
-            DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSSSS");
+    private static final DateTimeFormatter EPOCH_FORMAT = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSSSS");
 
     private final RestClient spaceTrackRestClient;
+
     private final SpaceTrackAuthService spaceTrackAuthService;
 
     /**
@@ -117,29 +117,35 @@ public class SpaceTrackService {
         }
     }
 
+
     /**
      * Derives the orbit regime from the GP record's orbital parameters.
      * <p>
      * Uses the same thresholds as the query filters in {@link space.satellite.constants.Constants}:
      * <ul>
-     *   <li>HEO: eccentricity &gt; 0.25</li>
-     *   <li>LEO: mean motion &gt; 11.25 rev/day (and eccentricity &le; 0.25)</li>
-     *   <li>MEO: period between 600 and 800 minutes</li>
-     *   <li>GEO: everything else (geostationary period ~1436 min)</li>
+     *   <li>HEO: eccentricity &gt; 0.25 (independent of altitude)</li>
+     *   <li>LEO: mean motion &gt; 11.25 rev/day (≈ altitude &lt; 2 000 km)</li>
+     *   <li>MEO: 1.5 &lt; mean motion ≤ 11.25 (≈ altitude 2 000–24 000 km)</li>
+     *   <li>GEO: mean motion ≤ 1.5 (geosynchronous and near-GEO drifters)</li>
      * </ul>
+     * Returns {@code null} if mean_motion is missing — the row will be skipped downstream.
      * </p>
      */
     private String deriveOrbitRegime(SpaceTrackGpRecord gp) {
         if (gp.eccentricity() != null && gp.eccentricity() > 0.25) {
             return "HEO";
         }
-        if (gp.meanMotion() != null && gp.meanMotion() > 11.25) {
+        if (gp.meanMotion() == null) {
+            return null;
+        }
+        if (gp.meanMotion() > 11.25) {
             return "LEO";
         }
-        if (gp.period() != null && gp.period() >= 600 && gp.period() <= 800) {
+        if (gp.meanMotion() > 1.5) {
             return "MEO";
         }
         return "GEO";
+
     }
 
     /** Parses Space-Track's microsecond UTC epoch string to {@link Instant}. */
@@ -160,7 +166,7 @@ public class SpaceTrackService {
     // -------------------------------------------------------------------------
 
     private String buildQueryUrl(SatelliteJobProperties props) {
-        StringBuilder url = new StringBuilder(SPACETRACK_BASE_URL + SPACETRACK_BASE_QUERY_URL);
+        StringBuilder url = new StringBuilder(SPACETRACK_BASE_QUERY_URL); // relative path - RestClient will prepend baseUrl
 
         if (StringUtils.hasText(props.getGroup())) {
             url.append("/OBJECT_TYPE/").append(props.getGroup().replace(" ", "%20"));
@@ -168,9 +174,10 @@ public class SpaceTrackService {
 
         if (StringUtils.hasText(props.getOrbitType())) {
             String orbitSegment = switch (props.getOrbitType().toUpperCase()) {
+                case "HEO" -> HEO_URL;
                 case "LEO" -> LEO_URL;
                 case "MEO" -> MEO_URL;
-                case "HEO" -> HEO_URL;
+                case "GEO" -> GEO_URL;
                 default -> "";
             };
             url.append(orbitSegment);

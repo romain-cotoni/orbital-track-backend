@@ -33,7 +33,7 @@ public class RestClientConfig {
      * @return configured RestClient for Space-Track
      */
     @Bean
-    public RestClient spaceTrackRestClient() {
+    public RestClient spaceTrackRestClient(SpaceTrackProperties properties) {
         HttpClient httpClient = HttpClient.newBuilder()
                 .connectTimeout(Duration.ofSeconds(30))
                 .cookieHandler(new CookieManager())
@@ -44,7 +44,7 @@ public class RestClientConfig {
         requestFactory.setReadTimeout(Duration.ofMinutes(5));
 
         return RestClient.builder()
-                .baseUrl("https://www.space-track.org")
+                .baseUrl(properties.getBaseUrl())
                 .requestFactory(requestFactory)
                 .build();
     }

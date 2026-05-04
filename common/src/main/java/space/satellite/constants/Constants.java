@@ -12,10 +12,14 @@ public final class Constants {
         throw new UnsupportedOperationException("Constant utility class");
     }
 
+
+    // OREKIT CONSTANTS
     public static final String OREKIT_DATA_URL = "https://gitlab.orekit.org/orekit/orekit-data/-/archive/main/orekit-data-main.zip";
     public static final String OREKIT_DATA_DIRECTORY = "common/src/main/resources/orekit-data";
     public static final String OREKIT_DATA_CLASSPATH = "orekit-data";
 
+
+    // TLE CONSTANTS
     public static final Duration TLE_CACHE_DURATION = Duration.ofHours(2);
 
     /** TLEs older than this are too stale for reliable SGP4/SDP4 propagation. */
@@ -25,13 +29,13 @@ public final class Constants {
     public static final Duration MAX_TLE_AGE_GEO = Duration.ofDays(180);
 
 
-    public static final String SPACETRACK_SOURCE = "spacetrack";
-    public static final String SPACETRACK_BASE_URL_PRD = "https://www.space-track.org";
-    public static final String SPACETRACK_BASE_URL_TEST = "https://for-testing-only.space-track.org";
-    public static final String SPACETRACK_LOGIN_URL = "/ajaxauth/login";
-    public static final String SPACETRACK_BASE_QUERY_URL = "/basicspacedata/query/class/gp";
-    public static final String SPACETRACK_BASE_URL = SPACETRACK_BASE_URL_TEST;
+    // SPACETRACK RELATIVE PATH URL DYNAMIC PARAMETERS COMPONENTS CONSTANTS
 
+    public static final String SPACETRACK_SOURCE = "spacetrack";
+
+    public static final String SPACETRACK_LOGIN_URL = "/ajaxauth/login";
+
+    public static final String SPACETRACK_BASE_QUERY_URL = "/basicspacedata/query/class/gp";
 
     /**
      * LEO (Low Earth Orbit)
@@ -43,9 +47,16 @@ public final class Constants {
     /**
      * MEO (Medium Earth Orbit)
      * Altitude between 2000km and 35786km
-     * Filter Logic: A "Period" (time for one orbit) between 600 and 800 minutes is a common MEO window
+     * Filter Logic: MEAN_MOTION > 1.5 && MEAN_MOTION <= 11.25
      */
-    public static final String MEO_URL = "/PERIOD/600--800/ECCENTRICITY/%3C0.25";
+    public static final String MEO_URL = "/MEAN_MOTION/1.5--11.25/ECCENTRICITY/%3C0.25";
+
+    /**
+     * GEO (Geostationary Earth Orbit)
+     * Altitude above 35786km
+     * Filter Logic: A MEAN_MOTION <= 1.5
+     */
+    public static final String GEO_URL = "/MEAN_MOTION/%3C1.5/ECCENTRICITY/%3C0.25";
 
     /**
      * HEO (Highly Elliptical Orbit)
@@ -74,19 +85,5 @@ public final class Constants {
     public static final String FORMAT_JSON = "/format/json";
 
     public static final DateTimeFormatter EPOCH_FORMATTER = DateTimeFormatter.ofPattern("yyDDD.HHmmssSSS");
-
-
-    // Examples of queries
-    // /basicspacedata/query/class/gp/orderby/NORAD_CAT_ID%20asc/format/3le
-    // /basicspacedata/query/class/gp/decay_date/null-val/epoch/%3Enow-3/format/3le
-    // /basicspacedata/query/class/gp/NORAD_CAT_ID/~~25544%2C20580%2C48274/orderby/OBJECT_NAME%20asc/
-
-    //Query for active payloads specifically in LEO within last 24 hours :
-    // https://www.space-track.org/basicspacedata/query/class/gp/OBJECT_TYPE/PAYLOAD/MEAN_MOTION/%3E11.25/epoch/%3Enow-1/decay_date/null-val/format/json
-
-    // Test queries
-    // /basicspacedata/query/class/gp/NORAD_CAT_ID/25544%2C%2020580%2C%2048274/orderby/OBJECT_NAME%20asc/metadata/true/emptyresult/show
-
-
 
 }

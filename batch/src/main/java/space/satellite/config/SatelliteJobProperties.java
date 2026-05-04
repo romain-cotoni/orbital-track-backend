@@ -21,17 +21,17 @@ public class SatelliteJobProperties {
      * "PAYLOAD", "DEBRIS", "ROCKET BODY".
      * </p>
      */
-    private String group = "PAYLOAD";
+    private String group;
 
     /**
      * Orbit altitude : LEO, MEO, HEO, or "" for all
      */
-    private String orbitType = "LEO";
+    private String orbitType;
 
     /**
      * Time gap within : 24h, 72h, 30d, or "" for all
      */
-    private String epochWindow = "30d";
+    private String epochWindow;
 
     private boolean excludeDecayed = true;
 
@@ -45,5 +45,5 @@ public class SatelliteJobProperties {
     private String cron = "0 0 2 * * *";
 
     /** Delay between Space-Track retry attempts in milliseconds. Default: 3 minutes. */
-    private long retryDelayMs = 180_000;
+    private long retryDelayMs = 180000;
 }

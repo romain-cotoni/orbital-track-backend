@@ -14,7 +14,6 @@ import org.springframework.web.client.RestClient;
 import space.satellite.config.SpaceTrackProperties;
 import space.satellite.exceptions.LoginException;
 
-import static space.satellite.constants.Constants.SPACETRACK_BASE_URL;
 import static space.satellite.constants.Constants.SPACETRACK_LOGIN_URL;
 
 /**
@@ -27,15 +26,13 @@ import static space.satellite.constants.Constants.SPACETRACK_LOGIN_URL;
 @Slf4j
 public class SpaceTrackAuthService {
 
-    private static final String LOGIN_URL = SPACETRACK_BASE_URL + SPACETRACK_LOGIN_URL;
-
     private final SpaceTrackProperties spaceTrackProperties;
 
     /**
-     * Authenticates with Space-Track and returns the session cookie.
-     * The provided RestClient is used to perform the request.
-     * If the client has a cookie jar configured (e.g. the batch), the session cookie is captured automatically for subsequent requests.
-     * Callers that manage cookies manually (e.g. the API module) can use the returned cookie string directly.
+     * <p>Authenticates with Space-Track and returns the session cookie.</p>
+     * <p>The provided RestClient is used to perform the request.</p>
+     * <p>If the client has a cookie jar configured (e.g. the batch), the session cookie is captured automatically for subsequent requests.</p>
+     * <p>Callers that manage cookies manually (e.g. the API module) can use the returned cookie string directly.</p>
      */
     public String login(RestClient restClient) {
         log.info("Logging in to Space-Track...");
@@ -45,7 +42,7 @@ public class SpaceTrackAuthService {
         formData.add("password", spaceTrackProperties.getPassword());
 
         ResponseEntity<String> response = restClient.post()
-                .uri(LOGIN_URL)
+                .uri(SPACETRACK_LOGIN_URL)  // relative path - RestClient prepends baseUrl
                 .contentType(MediaType.APPLICATION_FORM_URLENCODED)
                 .body(formData)
                 .retrieve()

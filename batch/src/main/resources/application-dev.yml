@@ -25,6 +25,7 @@ spring:
 spacetrack:
   identity: ${SPACETRACK_IDENTITY}
   password: ${SPACETRACK_PASSWORD}
+  base-url: https://for-testing-only.space-track.org
 
 # Override for dev: fast staggered crons (every 5 minutes, offset by 1 min per regime)
 sattrack:
@@ -32,12 +33,12 @@ sattrack:
     leo:
       group: ""                # fetch all object types (payload, debris, rocket body)
       orbit-type: "LEO"
-      epoch-window: "24h"
+      epoch-window: "30d"
       exclude-decayed: true
-      cleanup-threshold-days: 7
+      cleanup-threshold-days: 35
       chunk-size: 500
-      cron: "0 0/5 * * * *"   # every 5 min
-      retry-delay-ms: 5000     # 5 seconds between retries (dev)
+      cron: "0 0/5 * * * *" # every 5 min
+      retry-delay-ms: 30000     # 30 seconds between retries (dev)
     meo:
       group: ""
       orbit-type: "MEO"
@@ -45,8 +46,8 @@ sattrack:
       exclude-decayed: true
       cleanup-threshold-days: 35
       chunk-size: 500
-      cron: "0 1/5 * * * *"   # every 5 min, offset 1 min
-      retry-delay-ms: 5000
+      cron: "0 1/5 * * * *" # every 5 min, offset 1 min
+      retry-delay-ms: 30000
     heo:
       group: ""
       orbit-type: "HEO"
@@ -54,14 +55,14 @@ sattrack:
       exclude-decayed: true
       cleanup-threshold-days: 14
       chunk-size: 500
-      cron: "0 2/5 * * * *"   # every 5 min, offset 2 min
-      retry-delay-ms: 5000
+      cron: "0 2/5 * * * *" # every 5 min, offset 2 min
+      retry-delay-ms: 30000
     geo:
       group: ""
-      orbit-type: ""
+      orbit-type: "GEO"
       epoch-window: "180d"
       exclude-decayed: true
       cleanup-threshold-days: 60
       chunk-size: 500
-      cron: "0 3/5 * * * *"   # every 5 min, offset 3 min
-      retry-delay-ms: 5000
+      cron: "0 3/5 * * * *" # every 5 min, offset 3 min
+      retry-delay-ms: 30000

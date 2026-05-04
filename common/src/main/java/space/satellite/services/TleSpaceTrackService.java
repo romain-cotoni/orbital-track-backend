@@ -11,7 +11,6 @@ import org.springframework.web.client.RestClient;
 import space.satellite.exceptions.TleException;
 
 import static space.satellite.constants.Constants.SPACETRACK_BASE_QUERY_URL;
-import static space.satellite.constants.Constants.SPACETRACK_BASE_URL;
 
 @Service
 @Slf4j
@@ -32,7 +31,7 @@ public class TleSpaceTrackService implements TleService {
         // Step 1: Login and retrieve session cookie
         String cookie = spaceTrackAuthService.login(restClient);
 
-        // Step 2: Fetch TLE using the session cookie (may be null if session already active via cookie jar)
+        // Step 2: Fetch TLE using the session cookie (could be null if session already active via cookie jar)
         String tleBody = getTle(catalogNumber, cookie);
 
         // Step 3: Parse TLE
@@ -43,7 +42,7 @@ public class TleSpaceTrackService implements TleService {
     }
 
     private String getTle(int catalogNumber, String cookie) {
-        var request = restClient.get().uri(String.format(SPACETRACK_BASE_URL + SPACETRACK_BASE_QUERY_URL, catalogNumber));
+        var request = restClient.get().uri(String.format(SPACETRACK_BASE_QUERY_URL, catalogNumber)); // relative path - RestClient prepends baseUrl
 
         if (StringUtils.hasText(cookie)) {
             request = request.header(HttpHeaders.COOKIE, cookie);

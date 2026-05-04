@@ -28,4 +28,7 @@ public class SpaceTrackProperties {
 
     /** Space-Track account password. */
     private String password;
+
+    /** Space-Track base url (prod or test)*/
+    private String baseUrl;
 }
